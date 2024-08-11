@@ -57,6 +57,7 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
         with draw_text_image(text) as image_bytes:
             self.send_response(200)
             self.send_header('Content-type', 'image/jpeg')
+            self.send_header('Cache-Control', 'no-store')
             self.end_headers()
             self.wfile.write(image_bytes.getvalue())
 
