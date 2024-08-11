@@ -5,7 +5,7 @@ from io import BytesIO
 from urllib.parse import urlparse, parse_qs
 
 def draw_text_image(text):
-    width, height = 140, 20
+    width, height = 200, 20
     image = Image.new('RGB', (width, height), color = 'black')
 
     draw = ImageDraw.Draw(image)
@@ -24,10 +24,11 @@ def query_server(host, port):
     ping = PINGClient(host, port=port, timeout=3)
     try:
         stats = ping.get_stats()
+        motd = stats['description'].replace('\x1b[0m', '')
         players = stats['players']
         max = players['max']
         online = players['online']
-        text = f"{online}/{max}"
+        text = f"{online}/{max} {motd}"
     except Exception as e:
         text = f"Error: {e}"
 
@@ -38,7 +39,6 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             parsed = urlparse(self.path)
-            print(parsed)
             params = parse_qs(parsed.query)
             ip = params['ip'][0]
         except Exception as e:
@@ -51,9 +51,6 @@ class SimpleRequestHandler(BaseHTTPRequestHandler):
         port = 25565
         if len(parts) > 1:
             port = parts[1]
-
-        print("Host: ", host)
-        print("Port: ", port)
 
         text = query_server(host, port)
 
